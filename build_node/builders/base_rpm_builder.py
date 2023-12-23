@@ -33,7 +33,7 @@ from build_node.mock.mock_config import (
 from build_node.mock.mock_environment import MockError
 from build_node.utils.rpm_utils import unpack_src_rpm
 from build_node.utils.file_utils import download_file
-from build_node.utils.git_sources_utils import AlmaSourceDownloader
+from build_node.utils.git_sources_utils import AlmaSourceDownloader, CentSourceDownloader
 from build_node.utils.index_utils import extract_metadata
 from build_node.utils.spec_parser import SpecParser, SpecSource
 from build_node.ported import to_unicode
@@ -117,11 +117,16 @@ class BaseRPMBuilder(BaseBuilder):
                     if os.path.exists(os.path.join(
                             git_sources_dir, 'SOURCES')):
                         src_suffix_dir = 'SOURCES'
+                if self.task.is_cent_source():
+                    self.prepare_cent_sources(git_sources_dir)
+                    if os.path.exists(os.path.join(
+                            git_sources_dir, 'SOURCES')):
+                        src_suffix_dir = 'SOURCES'
                 self.execute_pre_build_hook(git_sources_dir)
                 source_srpm_dir = os.path.join(
                     self.task_dir, 'source_srpm')
                 os.makedirs(source_srpm_dir)
-                if self.task.is_alma_source():
+                if self.task.is_alma_source() or self.task.is_cent_source:
                     if src_suffix_dir == 'SOURCES':
                         copy_tree(
                             os.path.join(git_sources_dir, 'SOURCES'),
@@ -299,6 +304,10 @@ class BaseRPMBuilder(BaseBuilder):
 
     def prepare_alma_sources(self, git_sources_dir: str):
         downloader = AlmaSourceDownloader(git_sources_dir)
+        downloader.download_all()
+
+    def prepare_cent_sources(self, git_sources_dir: str):
+        downloader = CentSourceDownloader(git_sources_dir, self.task.ref.git_ref)
         downloader.download_all()
 
     def prepare_koji_sources(self, git_repo, git_sources_dir, output_dir,

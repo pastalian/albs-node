@@ -62,6 +62,9 @@ class Task(BaseModel):
     def is_alma_source(self):
         return self.ref.url.startswith('https://git.almalinux.org/')
 
+    def is_cent_source(self):
+        return self.ref.url.startswith('https://git.centos.org/')
+
 
 class Artifact(BaseModel):
 
