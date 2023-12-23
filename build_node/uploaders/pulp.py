@@ -246,12 +246,12 @@ class PulpBaseUploader(BaseUploader):
 
         """
         file_sha256 = hash_file(filename, hash_type='sha256')
-        reference = self.check_if_artifact_exists(file_sha256)
-        if not reference:
-            reference = self._send_file(filename)
+        # reference = self.check_if_artifact_exists(file_sha256)
+        # if not reference:
+        #     reference = self._send_file(filename)
         return Artifact(
             name=os.path.basename(filename),
-            href=reference,
+            href='',
             sha256=file_sha256,
             path=filename,
             type='rpm' if filename.endswith('.rpm') else 'build_log'
