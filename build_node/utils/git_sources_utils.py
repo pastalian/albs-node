@@ -46,3 +46,17 @@ class AlmaSourceDownloader(BaseSourceDownloader):
         # sources.almalinux.org doesn't accept default pycurl user-agent
         headers = ['User-Agent: Almalinux build node']
         return download_file(full_url, download_path, http_header=headers)
+
+class CentSourceDownloader(BaseSourceDownloader):
+
+    blob_storage = 'https://git.centos.org/sources/'
+
+    def __init__(self, sources_dir: str, git_ref: str):
+        super(CentSourceDownloader, self).__init__(sources_dir)
+        self.git_ref = git_ref
+
+    def download_source(self, checksum: str, download_path: str) -> str:
+        project = re.findall(r'.*/\.(.*)\.metadata$', self.find_metadata_file())[0]
+        path = '/'.join([project, self.git_ref, checksum])
+        full_url = urllib.parse.urljoin(self.blob_storage, path)
+        return download_file(full_url, download_path)
